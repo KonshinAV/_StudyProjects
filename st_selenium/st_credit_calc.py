@@ -31,7 +31,14 @@ class TextField (WebElement):
 
 class FormControl (WebElement):
     def get_all_options(self):
-        pass
+        """
+        Получение всех параметров поля Form
+        :return: tuple options
+        """
+        block = self.browser.find_element(by=By.XPATH, value=self.xpath_string)
+        all_in_block = block.find_elements(by=By.TAG_NAME, value='option')
+        options = (elem.get_attribute('textContent') for elem in all_in_block)
+        return tuple(options)
 
 class Creditcalc ():
     def __init__(self, browser = 'chrome', base_url = 'http://creditcalculator.pointschool.ru/'):
@@ -63,7 +70,7 @@ class Creditcalc ():
         # Имя
         self.input_first_name = TextFieldInput(browser=self.browser,
                                               xpath_string='/html/body/div[1]/div/div[1]/div[5]/div[2]/form/div[1]/div[2]/input')
-        # Отчетство
+        # Отчество
         self.input_middle_name = TextFieldInput(browser=self.browser,
                                               xpath_string='/html/body/div[1]/div/div[1]/div[5]/div[2]/form/div[1]/div[3]/input')
         # Паспорт
@@ -133,5 +140,5 @@ if __name__ == '__main__':
     credcalc.input_passport.input_value('1111 223344')
     credcalc.input_issued_by.input_value('Отделением')
     credcalc.input_issued_date.input_value ('11.11.1933')
-    credcalc.button_calculate.click()
+    print(credcalc.form_control_education.get_all_options())
 
