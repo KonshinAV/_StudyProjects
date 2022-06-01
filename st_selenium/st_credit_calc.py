@@ -3,56 +3,65 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from pprint import pprint
 
+class WebElement ():
+    def __init__(self,browser, xpath_string):
+        self.xpath_string = xpath_string
+        self.browser = browser
+    def click (self):
+        self.browser.find_element(by=By.XPATH, value=self.xpath_string).click()
+
+class Button (WebElement):
+    pass
+
+class TextFieldInput (WebElement):
+    def clear(self):
+        self.browser.find_element(by=By.XPATH, value=self.xpath_string).clear()
+
+    def input_string(self, value):
+        self.click()
+        self.clear()
+        self.browser.find_element(by=By.XPATH, value=self.xpath_string).send_keys(value)
+
+class TextField (WebElement):
+    def get_attr(self, attr):
+        return self.browser.find_element(by=By.XPATH,value=self.xpath_string).get_attribute(attr)
 
 class Creditcalc ():
     def __init__(self, browser = 'chrome', base_url = 'http://creditcalculator.pointschool.ru/'):
-
         self.base_url = base_url
         self.browser = webdriver.Chrome()
         self.browser.get(base_url)
+
         # Кнопка рассчитать
-        self.button_calculate = '/html/body/div[1]/div/div[1]/div[3]/div/form/div/div[4]/button'
+        self.button_calculate = Button(browser=self.browser,
+                                       xpath_string='/html/body/div[1]/div/div[1]/div[3]/div/form/div/div[4]/button')
+        # Кнопка/ссыка для отображения формы заполнения заявки
+        self.button_fill_full_form = Button(browser=self.browser,
+                                       xpath_string='/html/body/div[1]/div/div[1]/div[4]/div[2]/div[2]/a')
         # Поле для ввода - Желаемая сумма кредита
-        self.field_credit_sum = '/html/body/div[1]/div/div[1]/div[3]/div/form/div/div[1]/input'
+        self.input_credit_sum = TextFieldInput(browser=self.browser,
+                                         xpath_string='/html/body/div[1]/div/div[1]/div[3]/div/form/div/div[1]/input')
         # Поле для ввода - Первоначальный взнос
-        self.field_first_deposit = '/html/body/div[1]/div/div[1]/div[3]/div/form/div/div[2]/input'
+        self.input_first_deposit = TextFieldInput(browser=self.browser,
+                                            xpath_string='/html/body/div[1]/div/div[1]/div[3]/div/form/div/div[2]/input')
         # Поле для ввода - срок кредита
-        self.field_credit_period = '/html/body/div[1]/div/div[1]/div[3]/div/form/div/div[3]/input'
+        self.input_credit_period = TextFieldInput(browser=self.browser,
+                                            xpath_string= '/html/body/div[1]/div/div[1]/div[3]/div/form/div/div[3]/input')
         # Поле с отображением результатов простого расчета
-        self.field_simple_monthly_payment = '/html/body/div[1]/div/div[1]/div[4]/div[2]/div[1]/div[1]/div/div[2]'
-        # Результат простого расчета
-        self.field_simple_monthly_payment_value = ''
+        self.field_simple_monthly_payment = TextField (browser=self.browser,
+                                                 xpath_string='html/body/div[1]/div/div[1]/div[4]/div[2]/div[1]/div[1]/div/div[2]')
 
-
-    def simple_calculation (self):
-        """
-
-        :return:
-        """
-        self.browser.find_element(by=By.XPATH, value=self.button_calculate).click()
-        while self.browser.find_element(by=By.XPATH, value=self.field_simple_monthly_payment).get_attribute('textContent') == '':
+    def basic_calculation (self):
+        self.button_calculate.click()
+        while self.field_simple_monthly_payment.get_attr('textContent') == '':
             continue
-        res_monthly_payment_short = self.browser.find_element(by=By.XPATH, value=self.field_simple_monthly_payment).get_attribute('textContent')
-        return res_monthly_payment_short
+        result = self.field_simple_monthly_payment.get_attr('textContent')
+        print(f"result = {result}")
+        return result
 
-    def close (self):
+    def close_browser (self):
         self.browser.quit()
-
-    def write_simple_params (self, credit_sum = '', first_deposit = '', credit_period = ''):
-
-        if credit_sum != '':
-            self.browser.find_element(by=By.XPATH, value=self.field_credit_sum).clear()
-            self.browser.find_element(by=By.XPATH, value=self.field_credit_sum).send_keys(credit_sum)
-
-        if first_deposit != '':
-            self.browser.find_element(by=By.XPATH, value=self.field_first_deposit).clear()
-            self.browser.find_element(by=By.XPATH, value=self.field_first_deposit).send_keys(first_deposit)
-
-        if credit_period != '':
-            self.browser.find_element(by=By.XPATH, value=self.field_credit_period).clear()
-            self.browser.find_element(by=By.XPATH, value=self.field_credit_period).send_keys(credit_period)
 
 if __name__ == '__main__':
     credcalc = Creditcalc ()
-    credcalc.write_simple_params('10','11111','500')
-    print (credcalc.simple_calculation())
+    credcalc.basic_calculation()
