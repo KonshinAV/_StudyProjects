@@ -40,7 +40,7 @@ class FormControl (WebElement):
         options = (elem.get_attribute('textContent') for elem in all_in_block)
         return tuple(options)
 
-class Creditcalc ():
+class Site ():
     def __init__(self, browser = 'chrome', base_url = 'http://creditcalculator.pointschool.ru/'):
         self.base_url = base_url
         self.browser = webdriver.Chrome()
@@ -131,7 +131,7 @@ class Creditcalc ():
         self.browser.quit()
 
 if __name__ == '__main__':
-    credcalc = Creditcalc ()
+    credcalc = Site ()
     credcalc.basic_calculation()
     credcalc.button_fill_full_form.click()
     credcalc.input_second_name.input_value('Иванов')
